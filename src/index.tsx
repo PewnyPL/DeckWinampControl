@@ -48,6 +48,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
                 <MenuItem onSelected={() => {}}>Item #1</MenuItem>
                 <MenuItem onSelected={() => {}}>Item #2</MenuItem>
                 <MenuItem onSelected={() => {}}>Item #3</MenuItem>
+                <MenuItem onSelected={() => {}}>Dupa Kota</MenuItem>
               </Menu>,
               e.currentTarget ?? window
             )
