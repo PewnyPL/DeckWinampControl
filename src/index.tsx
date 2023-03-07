@@ -1,20 +1,16 @@
 import {
   ButtonItem,
   definePlugin,
-  DialogButton,
-  Menu,
-  MenuItem,
   PanelSection,
-  PanelSectionRow,
-  Router,
+  DialogButton,
   ServerAPI,
-  showContextMenu,
   staticClasses,
+  Focusable,
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { SiWindows95 } from "react-icons/si";
+import { SiWinamp } from "react-icons/si";
+import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
 
-import logo from "../assets/logo.png";
 
 // interface AddMethodArgs {
 //   left: number;
@@ -38,71 +34,104 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
   // };
 
   return (
-    <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {console.log("Before fetch");
-                  fetch('127.0.0.1:5151/play');
-                  console.log("After fetch");}}>Play</MenuItem>
-                <MenuItem onSelected={() => {fetch('127.0.0.1:5151/pause')}}>Pause</MenuItem>
-                <MenuItem onSelected={() => {fetch('127.0.0.1:5151/stop')}}>Stop</MenuItem>
-                <MenuItem onSelected={() => {}}>Next</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
+    <PanelSection title="Controls">
+      <Focusable
+      style={{ marginTop: "10px", marginBottom: "10px", display: "flex" }}
+      flow-children="horizontal"
+      >
+        <DialogButton
+          style={{
+            marginLeft: "0px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5px 0px 0px 0px",
+            minWidth: "0",
+          }}
           onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/decky-plugin-test");
+            fetch('http://127.0.0.1:5151/prev', {mode:'no-cors'})
           }}
         >
-          Router
-        </ButtonItem>
-      </PanelSectionRow>
+          <FaFastBackward style={{ marginTop: "-4px", display: "block" }} />
+        </DialogButton>
+        <DialogButton
+          style={{
+            marginLeft: "5px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5px 0px 0px 0px",
+            minWidth: "0",
+          }}
+          onClick={() => {
+            fetch('http://127.0.0.1:5151/play', {mode:'no-cors'})
+          }}
+        >
+          <FaPlay style={{ marginTop: "-4px", display: "block" }} />
+        </DialogButton>
+        <DialogButton
+          style={{
+            marginLeft: "5px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5px 0px 0px 0px",
+            minWidth: "0",
+          }}
+          onClick={() => {
+            fetch('http://127.0.0.1:5151/pause', {mode:'no-cors'})
+          }}
+        >
+          <FaPause style={{ marginTop: "-4px", display: "block" }} />
+        </DialogButton>
+        <DialogButton
+          style={{
+            marginLeft: "5px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5px 0px 0px 0px",
+            minWidth: "0",
+          }}
+          onClick={() => {
+            fetch('http://127.0.0.1:5151/stop', {mode:'no-cors'})
+          }}
+        >
+          <FaStop style={{ marginTop: "-4px", display: "block" }} />
+        </DialogButton>
+        <DialogButton
+          style={{
+            marginLeft: "5px",
+            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5px 0px 0px 0px",
+            minWidth: "0",
+          }}
+          onClick={() => {
+            fetch('http://127.0.0.1:5151/next', {mode:'no-cors'})
+          }}
+        >
+          <FaFastForward style={{ marginTop: "-4px", display: "block" }} /> 
+        </DialogButton>
+        </Focusable>
     </PanelSection>
   );
 };
 
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => Router.NavigateToLibraryTab()}>
-        Go to Library
-      </DialogButton>
-    </div>
-  );
-};
-
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-    exact: true,
-  });
-
+  
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
+    title: <div className={staticClasses.Title}>Deck Winamp Control</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <SiWindows95 />,
+    icon: <SiWinamp />,
     onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
+      
     },
   };
 });
