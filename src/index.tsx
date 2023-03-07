@@ -12,7 +12,7 @@ import {
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { SiWindows95 } from "react-icons/si";
 
 import logo from "../assets/logo.png";
 
@@ -45,10 +45,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
           onClick={(e) =>
             showContextMenu(
               <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-                <MenuItem onSelected={() => {}}>Dupa Kota</MenuItem>
+                <MenuItem onSelected={() => {console.log("Before fetch");
+                  fetch('127.0.0.1:5151/play');
+                  console.log("After fetch");}}>Play</MenuItem>
+                <MenuItem onSelected={() => {fetch('127.0.0.1:5151/pause')}}>Pause</MenuItem>
+                <MenuItem onSelected={() => {fetch('127.0.0.1:5151/stop')}}>Stop</MenuItem>
+                <MenuItem onSelected={() => {}}>Next</MenuItem>
               </Menu>,
               e.currentTarget ?? window
             )
@@ -98,7 +100,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>Example Plugin</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
+    icon: <SiWindows95 />,
     onDismount() {
       serverApi.routerHook.removeRoute("/decky-plugin-test");
     },
