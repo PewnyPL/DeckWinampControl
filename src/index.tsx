@@ -9,6 +9,11 @@ import {
 import { VFC, useEffect, useRef } from "react";
 import { SiWinamp } from "react-icons/si";
 import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
+//import xml2js from "xml2js";
+
+let songName = "";
+let artistName = "";
+let albumName = "";
 
 
 // interface AddMethodArgs {
@@ -37,7 +42,25 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   const updateStatus = () => {
     console.log("PING!");
     serverAPI.fetchNoCors("http://127.0.0.1:5151/consolestatus.xml")
-    .then(x => JSON.parse(x.result)
+    .then((res) => {
+      if(!res.success) {
+        console.log("Winamp off?")
+        return;
+      }
+
+      try{
+        console.log((res.result as {body:string}).body);
+        //const parser = new xml2js.Parser();
+        //parser.parseString((res.result as {body:string}).body,function(err,result){
+        //  console.log(result['console']['album']);
+        //});
+
+      } catch (err: any) {
+        console.log(err);
+        return;
+      }
+    })
+
   }
 
   useEffect(() => {
@@ -156,8 +179,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
-  
-  serverApi.fetchNoCors("");
 
   return {
     title: <div className={staticClasses.Title}>Deck Winamp Control</div>,
