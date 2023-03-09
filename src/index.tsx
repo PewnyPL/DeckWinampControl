@@ -6,18 +6,16 @@ import {
   staticClasses,
   Focusable,
 } from "decky-frontend-lib";
-import { VFC, useEffect, useRef, useState } from "react";
+import { VFC, useEffect, useState } from "react";
 import { SiWinamp } from "react-icons/si";
 import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
-
-
 
 // interface AddMethodArgs {
 //   left: number;
 //   right: number;
 // }
 
-const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
+const Content: VFC<{ serverAPI: ServerAPI, getSongName, artistName: string, albumName: string}> = ({serverAPI, getSongName, artistName, albumName}) => {
   // const [result, setResult] = useState<number | undefined>();
 
   // const onClick = async () => {
@@ -33,60 +31,16 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   //   }
   // };
 
-    const updateCallback = useRef<() => void>();
+    // const notify = async (message: string, duration: number = 1000) => {
+	// 	await serverAPI.toaster.toast({
+	// 		title: message,
+	// 		body: message,
+	// 		duration: duration,
+	// 		critical: true
+	// 	});
+	// }
 
-    const [songName, setSongName] = useState("");
-  const [artistName, setArtistName] = useState("");
-  const [albumName, setAlbumName] = useState("");
-  const updateStatus = () => {
-    console.log("PING!");
-    serverAPI.fetchNoCors("http://127.0.0.1:5151/consolestatus.xml")
-    .then((res) => {
-      if(!res.success) {
-        console.log("Winamp off?")
-        return;
-      }
-
-      try{
-        const winampStatusXML = (res.result as {body:string}).body;
-        const parser= new DOMParser();
-        const doc = parser.parseFromString(winampStatusXML,"text/xml");
-        setSongName(doc.getElementsByTagName("title")[0].textContent as string);
-        setArtistName(doc.getElementsByTagName("artist")[0].textContent as string);
-        setAlbumName(doc.getElementsByTagName("album")[0].textContent as string);
-        console.log(artistName);
-
-      } catch (err: any) {
-        console.log(err);
-        return;
-      }
-    })
-
-  }
-
-  useEffect(() => {
-    updateCallback.current = updateStatus;
-  });
-
-  useEffect(() => {
-    console.debug("Setting up periodic hooks for MusicControl.");
-    function tick() {
-      updateCallback!.current!();
-    }
-    const id = setInterval(tick, 1000);
-    updateStatus();
-
-    return () => clearInterval(id);
-  }, []);
-
-  const notify = async (message: string, duration: number = 1000) => {
-		await serverAPI.toaster.toast({
-			title: message,
-			body: message,
-			duration: duration,
-			critical: true
-		});
-	}
+  console.log("PING");
 
   return (
     <PanelSection title="Controls">
@@ -175,20 +129,55 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
           <FaFastForward style={{ marginTop: "-4px", display: "block" }} /> 
         </DialogButton>
         </Focusable>
-        <div>{songName}<br/>{artistName}<br/>{albumName}</div>
+        <div>{getSongName()}<br/>{artistName}<br/>{albumName}</div>
     </PanelSection>
   );
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
 
+  let songName="";
+  let artistName="";
+  let albumName="";
+  const getSongName = () => {
+    return songName;
+  }
+
+  const updateStatus = () => {
+    serverApi.fetchNoCors("http://127.0.0.1:5151/consolestatus.xml")
+    .then((res) => {
+      if(!res.success) {
+        console.log("Winamp off?")
+        return;
+      }
+
+      try{
+        const winampStatusXML = (res.result as {body:string}).body;
+        const parser= new DOMParser();
+        const doc = parser.parseFromString(winampStatusXML,"text/xml");
+        songName=doc.getElementsByTagName("title")[0].textContent as string;
+        artistName=doc.getElementsByTagName("artist")[0].textContent as string;
+        albumName=doc.getElementsByTagName("album")[0].textContent as string;
+        console.log(songName);
+
+      } catch (err: any) {
+        console.log(err);
+        return;
+      }
+    })
+
+  }
+
+    const id = setInterval(updateStatus, 1000);
+    updateStatus();
+    
   return {
     title: <div className={staticClasses.Title}>Deck Winamp Control</div>,
-    content: <Content serverAPI={serverApi} />,
+    content: <Content serverAPI={serverApi} getSongName={getSongName} artistName={artistName} albumName={albumName}/>,
     icon: <SiWinamp />,
     alwaysRender: true,
     onDismount() {
-      
+      clearInterval(id);
     },
   };
 });
