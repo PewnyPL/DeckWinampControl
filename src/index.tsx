@@ -6,14 +6,9 @@ import {
   staticClasses,
   Focusable,
 } from "decky-frontend-lib";
-import { VFC, useEffect, useRef } from "react";
+import { VFC, useEffect, useRef, useState } from "react";
 import { SiWinamp } from "react-icons/si";
 import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
-import xmljs from "xml-js";
-
-let songName = "";
-let artistName = "";
-let albumName = "";
 
 
 
@@ -40,6 +35,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 
     const updateCallback = useRef<() => void>();
 
+    const [songName, setSongName] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [albumName, setAlbumName] = useState("");
   const updateStatus = () => {
     console.log("PING!");
     serverAPI.fetchNoCors("http://127.0.0.1:5151/consolestatus.xml")
@@ -50,8 +48,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
       }
 
       try{
-        console.log((res.result as {body:string}).body);
-        console.log(xmljs.xml2js((res.result as {body:string}).body));
+        const winampStatusXML = (res.result as {body:string}).body;
+        const parser= new DOMParser();
+        const doc = parser.parseFromString(winampStatusXML,"text/xml");
+        setSongName(doc.getElementsByTagName("title")[0].textContent as string);
+        setArtistName(doc.getElementsByTagName("artist")[0].textContent as string);
+        setAlbumName(doc.getElementsByTagName("album")[0].textContent as string);
+        console.log(artistName);
 
       } catch (err: any) {
         console.log(err);
@@ -172,6 +175,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
           <FaFastForward style={{ marginTop: "-4px", display: "block" }} /> 
         </DialogButton>
         </Focusable>
+        <div>{songName}<br/>{artistName}<br/>{albumName}</div>
     </PanelSection>
   );
 };
