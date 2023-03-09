@@ -9,11 +9,12 @@ import {
 import { VFC, useEffect, useRef } from "react";
 import { SiWinamp } from "react-icons/si";
 import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
-//import xml2js from "xml2js";
+import xmljs from "xml-js";
 
 let songName = "";
 let artistName = "";
 let albumName = "";
+
 
 
 // interface AddMethodArgs {
@@ -50,10 +51,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 
       try{
         console.log((res.result as {body:string}).body);
-        //const parser = new xml2js.Parser();
-        //parser.parseString((res.result as {body:string}).body,function(err,result){
-        //  console.log(result['console']['album']);
-        //});
+        console.log(xmljs.xml2js((res.result as {body:string}).body));
 
       } catch (err: any) {
         console.log(err);
