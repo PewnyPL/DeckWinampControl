@@ -6,16 +6,18 @@ import {
   staticClasses,
   Focusable,
 } from "decky-frontend-lib";
-import { VFC, useEffect, useState } from "react";
+import { VFC, useEffect, useState, useContext } from "react";
 import { SiWinamp } from "react-icons/si";
 import { FaPlay, FaPause, FaStop, FaFastForward, FaFastBackward } from "react-icons/fa";
+import { WinampContextType } from './types';
+import WinampProvider, { WinampContext } from "./context";
 
 // interface AddMethodArgs {
 //   left: number;
 //   right: number;
 // }
 
-const Content: VFC<{ serverAPI: ServerAPI, getSongName, artistName: string, albumName: string}> = ({serverAPI, getSongName, artistName, albumName}) => {
+const Content: VFC<{ serverAPI: ServerAPI, getSongName:()=>string, getArtistName:()=>string, getAlbumName:()=>string}> = ({getSongName, getArtistName, getAlbumName}) => {
   // const [result, setResult] = useState<number | undefined>();
 
   // const onClick = async () => {
@@ -39,6 +41,8 @@ const Content: VFC<{ serverAPI: ServerAPI, getSongName, artistName: string, albu
 	// 		critical: true
 	// 	});
 	// }
+
+  const { songName, artistName, albumName } = useContext(WinampContext) as WinampContextType;
 
   console.log("PING");
 
@@ -129,7 +133,7 @@ const Content: VFC<{ serverAPI: ServerAPI, getSongName, artistName: string, albu
           <FaFastForward style={{ marginTop: "-4px", display: "block" }} /> 
         </DialogButton>
         </Focusable>
-        <div>{getSongName()}<br/>{artistName}<br/>{albumName}</div>
+        <div>{songName}<br/>{artistName}<br/>{albumName}</div>
     </PanelSection>
   );
 };
@@ -141,6 +145,12 @@ export default definePlugin((serverApi: ServerAPI) => {
   let albumName="";
   const getSongName = () => {
     return songName;
+  }
+  const getArtistName = () => {
+    return artistName;
+  }
+  const getAlbumName = () => {
+    return albumName;
   }
 
   const updateStatus = () => {
@@ -159,6 +169,7 @@ export default definePlugin((serverApi: ServerAPI) => {
         artistName=doc.getElementsByTagName("artist")[0].textContent as string;
         albumName=doc.getElementsByTagName("album")[0].textContent as string;
         console.log(songName);
+        
 
       } catch (err: any) {
         console.log(err);
@@ -173,7 +184,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     
   return {
     title: <div className={staticClasses.Title}>Deck Winamp Control</div>,
-    content: <Content serverAPI={serverApi} getSongName={getSongName} artistName={artistName} albumName={albumName}/>,
+    content: <WinampProvider><Content serverAPI={serverApi} getSongName={getSongName} getArtistName={getArtistName} getAlbumName={getAlbumName}/></WinampProvider>,
     icon: <SiWinamp />,
     alwaysRender: true,
     onDismount() {
